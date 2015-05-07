@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html ng-app="gclone">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Gallyo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<link href="/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css" />
+<script language="javascript" src="js/html5.js"></script>
+<script type='text/javascript' src='/js/jquery-1.7.1.min.js'></script>    
+<script src="/js/angular.min.js"></script>
+<script src="/js/controllers.js"></script>   
+<script src="/js/ui-bootstrap-tpls-0.6.0.js"></script>
+<script src="/js/jwplayer-5.9.js"></script>
+<!-- Pagination code start -->
+ <script>
+ var app = angular.module('gclone', ['ui.bootstrap']);
+app.factory('gclonePaginationService', function ($http) {
+  return {
+  	gettopNews: function (category, count, skip) {
+			return $http.get('/api/topnews/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+				return result.data.rows;
+			});
+		},
+    
+    getNewsCount: function (category) {
+      return $http.get('/api/topnews/count?c=' + category).then(function (result) {
+        return result.data.total_rows;
+      });
+    },
+    getVideo: function (category, count, skip) {
+      return $http.get('/api/videos/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+        return result.data.rows;
+      });
+    },
+    getUSMarketsNews: function (category, count, skip) {
+      return $http.get('/api/usmarkets/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+        return result.data.rows;
+      });
+    },
+    getWorldNews: function (category, count, skip) {
+			return $http.get('/api/worldnews/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+				return result.data.rows;
+			});
+		},		
+	getUSNews: function (category, count, skip) {
+		return $http.get('/api/usnews/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+			return result.data.rows;
+		});
+	},
+	getEntertainmentNews: function (category, count, skip) {
+	  return $http.get('/api/entertainment/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+	    return result.data.rows;
+	  });
+	},
+    getPoliticsNews: function (category, count, skip) {
+      return $http.get('/api/politicsnews/channel?c=' + category + '&l=' + count + '&skip=' + skip).then(function (result) {
+        return result.data.rows;
+      });
+    },
+    
+  };
+});
+app.controller('GclonePagination', function ($scope,gclonePaginationService) { 
+  $scope.latestVideos     = gclonePaginationService.getVideo('full_composite_article',3,0);
+  $scope.trendingVideos = gclonePaginationService.getVideo('by_id_title_desc_thumb_date',4,3);
+  $scope.topNews      = gclonePaginationService.gettopNews('by_id_title_desc_thumb_date',4,0);
+  $scope.USMarkets = gclonePaginationService.getUSMarketsNews('by_id_title_desc_thumb_date',6,0);
+  $scope.worldNews    = gclonePaginationService.getWorldNews('by_id_title_desc_thumb_date',4,0);
+  $scope.USNews       = gclonePaginationService.getUSNews('by_id_title_desc_thumb_date',6,0);
+  $scope.PoliticsNews = gclonePaginationService.getPoliticsNews('by_id_title_desc_thumb_date',6,0);
+  $scope.popularStories = gclonePaginationService.getPoliticsNews('by_id_title_desc_thumb_date',4,2);
+  $scope.entertainmentNews = gclonePaginationService.getEntertainmentNews('by_id_title_desc_thumb_date',6,0); 
+  $scope.currentYear = (new Date).getFullYear();
+  // Non Featured Videos i.e all Videos
+  $scope.newsPerPage = 10;
+  // Get all Video's Count
+  $scope.newsCount = gclonePaginationService.getNewsCount('{{news_category}}');
+
+  // Generate the numberOfPages and pages content based on the videoCount
+  $scope.$watch('newsCount', function (newsCount) {
+    if (newsCount !== undefined) {
+      // Sample Output: {"rows":[{"key":null,"value":650}]}
+      $scope.numberOfPages = (Math.ceil(newsCount/$scope.newsPerPage)).toString();
+
+      // Pagination plugin
+      $scope.bigTotalItems = newsCount;
+    }
+  });
+
+  // Javascript Custom Function to get teh URL params, decode them
+  function getURLParameter (name) {
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+  }
+
+  // Get noneFeaturedVideos list based on the page(number) we are hitting from.
+  $scope.currentPageNumber = parseInt(getURLParameter('p'), 10);
+  
+  if (isNaN($scope.currentPageNumber)) {
+    skipValue = 0;
+    $scope.currentPageNumber = 1;
+  } else {
+    skipValue = parseInt(($scope.currentPageNumber - 1) * $scope.videosPerPage, 10);
+  }
+
+  // Pagination plugin
+  $scope.bigCurrentPage = $scope.currentPageNumber;
+  $scope.maxSize = 6; // Max number of pages to be displayed at a time
+
+
+  // Pagination plugin
+  // This function is triggred when user tends to change the page using the plugin.
+  $scope.pageChanged = function (page) {
+    location.replace('/more_topnews?c={{news_category}}&p=' + page);
+  };
+
+  var video = "http://video.contentapi.ws/"+$('#video_val').val()   
+  // start of code for generating cb,pagetit,pageurl
+  // var vastURI = 'http://vast.optimatic.com/vast/getVast.aspx?id=en732n1l1f3&zone=vpaidtag&pageURL=[INSERT_PAGE_URL]&pageTitle=[INSERT_PAGE_TITLE]&cb=[CACHE_BUSTER]';
+// var vastURI = 'http://ad4.liverail.com/?LR_PUBLISHER_ID=44293&LR_SCHEMA=vast2-vpaid';
+  
+  // end of code for generating cb,pagetit,pageurl
+  $scope.loadVideo = function(){
+    $(document).ready(function() {
+      // var hvideo = $("#hid").val();
+      // alert(hvideo);
+      jwplayer('trailor').setup({
+                  "flashplayer": "http://player.longtailvideo.com/player.swf",
+                  "playlist": [
+                    {
+                      "file": video
+                    }
+                  ],
+                  "width": 638,
+                  "height": 330,
+                  stretching: "exactfit",
+                  skin: "http://content.longtailvideo.com/skins/glow/glow.zip",
+                  autostart: true,
+                  "controlbar": {
+                    "position": "bottom"
+                  },
+                  "plugins": {
+                     "autoPlay": true,
+                    "ova-jw": {
+                      "ads": {
+                        // "companions": {
+                        //   "regions": [
+                        //     {
+                        //       "id": "companion",
+                        //       "width": 80,
+                        //       "height": 300
+                        //     }
+                        //   ]
+                        // },
+                        "schedule": [
+                          {
+                            "position": "pre-roll",
+                            // "tag": updateURL(vastURI)
+                            "tag": "http://ad4.liverail.com/?LR_PUBLISHER_ID=44293&LR_SCHEMA=vast2-vpaid"
+                          }
+                        ]
+                      },
+                      "debug": {
+                        "levels": "none"
+                      }
+                    }
+                  }
+                });
+    })
+  
+  };
+  
+});
+</script>
+</head>
+
+<body ng-controller="GclonePagination" ng-cloak>
+
+<nav>
+	<div class="container">
+		<div class="menu"> <span>MENU</span>
+			<ul class="Navigation">
+				<li> <a href="/" title="Now!" class="active">Now!</a> </li>
+				<li><a href="/more_worldnews?c=by_id_title_desc_thumb_date&p=1" title="World News">World News</a></li>
+				<li><a href="/more_politics?c=by_id_title_desc_thumb_date&p=1" title="US  Politics">US  Politics</a></li>
+				<li><a href="/more_entertainment?c=by_id_title_desc_thumb_date&p=1" title="Entertainment">Entertainment</a></li>
+				<li><a href="/more_usmarkets?c=by_id_title_desc_thumb_date&p=1" title="Markets">Markets</a></li>
+				<li><a href="/more_money?c=by_id_title_desc_thumb_date&p=1" title="Money">Money</a></li>
+				<li><a href="#" title="Contact Us">Contact Us</a></li>
+			</ul>
+		</div>
+		<!-- menu end -->
+		
+		<div class="TopRight">
+			<a href="#"><img src="images/twitter-tp.png"></a>
+			<a href="#"><img src="images/facebook-tp.png"></a>
+		</div>
+		<!-- TopRight end -->
+		
+	</div>
+	<span class="clear"></span>
+</nav>
+<!-- nav end -->
+
+<div class="container">
+	<header>
+		<a href="/" title="Gallyo" class="logo"><img src="images/logo.png" alt=""></a>
+		<div class="topbanner">
+			<img src="images/topbanner.jpg" alt="">
+		</div>
+		
+		<span class="clear"></span>
+	</header><!-- header end -->
+	
+
+	<div class="slideshow">
+		<div class="slider">
+			<input type="hidden" name="vide_val" id="video_val" value="{{videoParam.video}}">
+      		<div id="trailor" ng-init="loadVideo()">Loading the player...</div>
+			<div class="slideshow-description">{{videoParam.description}}</div>
+		</div>
+	
+		<div class="slideshow-rt">
+			<img src="images/right-ad1.jpg" alt="">
+		</div>
+		
+		<span class="clear"></span>	
+	</div><!-- slideshow end -->
+	
+
+	<div class="futures">
+		
+		<div class="VideDiv" ng-repeat="n in latestVideos" ng-cloak>
+			<div class="video">
+				<a href="/video?id={% verbatim %}{{ n.value.id }}{% endverbatim %}">
+					<img src="http://img.contentapi.ws/{% verbatim %}{{ n.value.thumb_image }}{% endverbatim %}" alt="">
+				<span class="videotext"></span>
+				</a>
+			</div>
+			<div class="video-description">{% verbatim %}{{ n.value.title.substr(0, 40) }}{% endverbatim %}... 
+				<span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span>
+			</div>
+		</div>
+		<!-- VideDiv end -->	
+		
+		<span class="clear"></span>
+	</div><!-- Futures Div End -->
+
+	
+
+
+
+	<section class="contentarea">
+	
+		<aside class="leftcontent">
+		<div class="module">
+    <div class="module-title">Top Stories</div>  
+
+    	{% for n in allnews %}
+      	<div class="videoarea">
+    			<div class="thumb">
+    				<a  href="/more?id={{n.value.id}}">
+              			<img src="http://img.contentapi.ws/{{n.value.thumbimage}}"  alt="" title="{{n.value.title}}"/>
+            		</a>				
+    			</div>
+  			 <div class="video-title">{{ n.value.title}}</div>
+  		  </div>	
+  		{% endfor %}
+		
+		<span class="clear"></span>
+		
+		<div class="row" style="margin-left: -5px;border-top: 1px dashed #ccc;">
+            <pagination style="text-align: center;" ng-controller="GclonePagination" on-select-page="pageChanged(page)" items-per-page="newsPerPage" total-items="bigTotalItems" page="bigCurrentPage" max-size="maxSize" boundary-links="true" rotate="false" num-pages="numPages"></pagination>
+        </div>
+
+    
+	<span class="clear"></span>
+	</div>
+
+			<div class="col-1">
+				<div class="module">
+					<div class="module-title">US News</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in USNews">
+							<p>{% verbatim %}{{ n.value.title }}{% endverbatim %} 
+							<span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+						</div><!-- News Row end -->						
+						
+					<a href="#" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- US News Module end -->
+				
+				<div class="module">
+					<div class="module-title">US Politics</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in PoliticsNews">
+							<a href="/more?id={% verbatim %}{{ n.value.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.value.title }}{% endverbatim %} <span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->						
+					<a href="/more_usnews?c=by_id_title_desc_thumb_date&p=1" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- US Politics Module end -->
+				
+				<div class="module">
+					<div class="module-title">Entertainment</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in entertainmentNews">
+							<a href="/more?id={% verbatim %}{{ n.value.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.value.title }}{% endverbatim %} <span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->
+					<a href="#" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- Entertainment Module end -->
+				
+			</div><!-- First Colum end -->
+	
+			<div class="col-2">
+				<div class="module">
+					<div class="module-title">Top Stories</div>
+					<div class="module-inner">
+						<div class="row" ng-repeat="n in topNews">
+							<div class="thumbdiv">
+								<a href="/more?id={% verbatim %}{{ n.value.id }}{% endverbatim %}">
+									<img src="http://img.contentapi.ws/{% verbatim %}{{ n.value.thumb_image }}{% endverbatim %}" alt="">
+								</a>
+							</div>
+							<div class="newscontent">
+								<p><span class="news-title">{% verbatim %}{{ n.value.title }}{% endverbatim %}</span>...  
+								<span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+							</div>
+						</div><!-- Row end -->			
+			
+						<a href="#" class="right more">Find More Stories</a>
+						<span class="clear"></span>
+					</div> 
+				</div><!-- Top Stories module end -->
+				
+				<div class="module">
+					<div class="module-title">Trending Videos</div>
+					<div class="module-inner">					
+					<div class="row" ng-repeat="n in trendingVideos">
+						<div class="thumbdiv">
+							<a href="/video?id={% verbatim %}{{ n.value.id }}{% endverbatim %}">
+								<img src="http://img.contentapi.ws/{% verbatim %}{{ n.value.thumb_image }}{% endverbatim %}" alt="">
+							
+						</div>
+						<div class="newscontent">
+							<p><span class="news-title">{% verbatim %}{{ n.value.title }}{% endverbatim %}</span>...  <span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div>
+					</div><!-- Row end -->
+						
+						
+			
+			
+						<a href="#" class="right more">Find More Stories</a>
+						<span class="clear"></span>
+					</div> 
+				</div><!-- Trending Videos module end -->
+				
+				<div class="module">
+					<div class="module-title">US Markets</div>
+					<div class="module-inner">
+
+						<div class="newsrow" ng-repeat="n in USMarkets">
+							<a href="/more?id={% verbatim %}{{ n.value.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.value.title }}{% endverbatim %} <span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->
+						
+						
+					<a href="#" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- US Markets Module end -->
+				
+			</div><!-- Second Colum end -->
+			
+		</aside><!-- leftcontent end -->
+
+
+		<aside class="sidebar">
+			<div class="rightad"><img src="images/right-ad2.jpg" alt=""></div>
+			
+			<div class="module margin10_T">
+				<div class="module-title">Popular Stories</div>
+				<div class="module-inner">					
+
+					<div class="row" ng-repeat="n in popularStories">
+						<div class="thumbdiv">
+							<a href="#">
+								<img src="http://img.contentapi.ws/{% verbatim %}{{ n.value.thumb_image }}{% endverbatim %}" alt="">
+							</a>
+						</div>
+						<div class="newscontent">
+							<p>{% verbatim %}{{ n.value.title }}{% endverbatim %} <span class="date">{% verbatim %}{{ n.value.upload_date }}{% endverbatim %}</span></p>
+						</div>
+					</div><!-- Row end -->		
+		
+					<a href="#" class="right more">Find More Stories</a>
+					<span class="clear"></span>
+				</div> 
+			</div><!-- Popular Stories module end -->
+        
+        	<div class="center margin20_T"><img src="images/ad-160x600.jpg"></div>
+		</aside><!-- Side Bar end -->
+
+		<span class="clear"></span>
+	</section><!-- Contentarea end -->
+  
+
+
+	<div class="bottom"><div class="ad1"><img src="images/ad1.jpg" alt=""></div></div>
+
+	<footer>
+		<span class="left">Copyright &copy; 2014 Wildridge. All Rights Reserved | 2014 Wildridge. All Rights Reserved | <a href="/tnc">Terms & Conditions</a></span>
+		<span class="right"><a href="#"><img src="images/facebook.png"></a> <a href="#"><img src="images/twitter.png"></a></span>
+		
+		<span class="clear"></span>
+	</footer>
+	<!-- footer end -->
+
+</div>
+<!-- container end -->
+
+</body>
+</html>	

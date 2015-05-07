@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html ng-app="gclone">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Gallyo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<script language="javascript" src="js/html5.js"></script>
+<script type='text/javascript' src='/js/jquery-1.7.1.min.js'></script>    
+<script src="/js/angular.min.js"></script>
+<script src="/js/controllers.js"></script>   
+<script src="/js/ui-bootstrap-tpls-0.6.0.js"></script>
+<script src="/js/jwplayer-5.9.js"></script>
+</head>
+
+<body ng-controller="GcloneHome" ng-cloak>
+
+<nav>
+	<div class="container">
+		<div class="menu"> <span>MENU</span>
+			<ul class="Navigation">
+				<li> <a href="/" title="Now!" >Now!</a> </li>
+				<li><a href="/more_news?c=World&p=1" title="World News" {%  ifequal allnews.channel "us_world" %}class="active"{% endifequal %}>World News</a></li>
+				<li><a href="/more_news?c=Politics&p=1" title="US  Politics" {%  ifequal allnews.channel "us_politics" %}class="active"{% endifequal %}>US  Politics</a></li>
+				<li><a href="/more_news?c=Entertainment&p=1" title="Entertainment" {%  ifequal allnews.channel "us_entertainment" %}class="active"{% endifequal %}>Entertainment</a></li>
+				<li><a href="/more_news?c=Markets&p=1" title="Markets" {%  ifequal allnews.channel "us_markets" %}class="active"{% endifequal %}>Markets</a></li>
+				<li><a href="/more_news?c=Money&p=1" title="Money" {%  ifequal allnews.channel "us_money" %}class="active"{% endifequal %}>Money</a></li>
+				<li><a href="#" title="Contact Us">Contact Us</a></li>
+			</ul>
+		</div>
+		<!-- menu end -->
+		
+		<div class="TopRight">
+			<a href="#"><img src="images/twitter-tp.png"></a>
+			<a href="#"><img src="images/facebook-tp.png"></a>
+		</div>
+		<!-- TopRight end -->
+		
+	</div>
+	<span class="clear"></span>
+</nav>
+<!-- nav end -->
+
+<div class="container">
+	<header>
+		<a href="/" title="Gallyo" class="logo"><img src="images/logo.png" alt=""></a>
+		<div class="topbanner">
+			<img src="images/topbanner.jpg" alt="">
+		</div>
+		
+		<span class="clear"></span>
+	</header><!-- header end -->
+	
+
+	<div class="slideshow">
+		<div class="slider">
+			<input type="hidden" name="vide_val" id="video_val" value="{{videoParam.video}}">
+      		<div id="trailor" ng-init="loadVideo()">Loading the player...</div>
+			<div class="slideshow-description">{{videoParam.description}}</div>
+		</div>
+	
+		<div class="slideshow-rt">
+			<img src="images/right-ad1.jpg" alt="">
+		</div>
+		
+		<span class="clear"></span>	
+	</div><!-- slideshow end -->
+	
+
+	<div class="futures">
+		
+		<div class="VideDiv" ng-repeat="n in latestVideos" ng-cloak>
+			<div class="video">
+				<a href="/video?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+					<img src="http://img.contentapi.ws/{% verbatim %}{{ n.thumb_image }}{% endverbatim %}" alt="">
+				<span class="videotext"></span>
+				</a>
+			</div>
+			<div class="video-description">{% verbatim %}{{ n.title.substr(0, 40) }}{% endverbatim %}... 
+				<span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span>
+			</div>
+		</div>
+		<!-- VideDiv end -->	
+		
+		<span class="clear"></span>
+	</div><!-- Futures Div End -->
+
+	
+
+	<section class="contentarea">
+	
+		<aside class="leftcontent">
+			<div class="module inner-content" id="show_video">
+				<div class="module-title">{{allnews.title}}</div>
+
+				<div class="module-inner">
+					<img src="http://img.contentapi.ws/{{allnews.base_image}}" title="{{allnews.title}}"> 
+					<div class="description margin10_T">{{allnews.news_body}}</div>
+				</div>	
+				<span class="clear"></span>
+			</div>
+
+			<div class="col-1">
+				<div class="module">
+					<div class="module-title">US News</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in USNews">
+							<a href="/more?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}... 
+							<span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->						
+						
+					<a href="/more_news?c=US&p=1" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- US News Module end -->
+				
+				<div class="module">
+					<div class="module-title">US Politics</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in PoliticsNews">
+							<a href="/more?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}... <span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->						
+					<a href="/more_news?c=Politics&p=1" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- US Politics Module end -->
+				
+				<div class="module">
+					<div class="module-title">Entertainment</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in entertainmentNews">
+							<a href="/more?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}... <span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->
+					<a href="/more_news?c=Entertainment&p=1" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- Entertainment Module end -->
+				
+			</div><!-- First Colum end -->
+	
+			<div class="col-2">
+				<div class="module">
+					<div class="module-title">Top Stories</div>
+					<div class="module-inner">
+						<div class="row" ng-repeat="n in topNews">
+							<div class="thumbdiv">
+								<a href="/more?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+									<img src="http://img.contentapi.ws/{% verbatim %}{{ n.thumb_image }}{% endverbatim %}" alt="">
+								
+							</div>
+							<div class="newscontent">
+								<p><span class="news-title">{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}</span>...  
+								<span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+								</a>
+							</div>
+						</div><!-- Row end -->			
+			
+						<a href="/more_news?c=Top&p=1" class="right more">Find More Stories</a>
+						<span class="clear"></span>
+					</div> 
+				</div><!-- Top Stories module end -->
+				
+				<div class="module">
+					<div class="module-title">Trending Videos</div>
+					<div class="module-inner">					
+					<div class="row" ng-repeat="n in trendingVideos">
+						<div class="thumbdiv">
+							<a href="/video?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+								<img src="http://img.contentapi.ws/{% verbatim %}{{ n.thumb_image }}{% endverbatim %}" alt="">
+							
+						</div>
+						<div class="newscontent">
+							<p><span class="news-title">{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}</span>...  <span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div>
+					</div><!-- Row end -->
+					<a href="/more_videos?c=by_id_title_desc_thumb_date&p=1" class="right more">Find More Stories</a>
+						<span class="clear"></span>
+					</div> 
+				</div><!-- Trending Videos module end -->
+				
+				<div class="module">
+					<div class="module-title">US Markets</div>
+					<div class="module-inner">
+						<div class="newsrow" ng-repeat="n in USMarkets">
+							<a href="/more?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+							<p>{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}... <span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div><!-- News Row end -->
+						
+						
+					<a href="/more_news?c=Markets&p=1" class="more right">Find More Stories</a>
+					<span class="clear"></span>
+					</div>
+				</div><!-- US Markets Module end -->
+				
+			</div><!-- Second Colum end -->
+			
+		</aside><!-- leftcontent end -->
+
+
+		<aside class="sidebar">
+			<div class="rightad"><img src="images/right-ad2.jpg" alt=""></div>
+			
+			<div class="module margin10_T">
+				<div class="module-title">Popular Stories</div>
+				<div class="module-inner">
+					<div class="row" ng-repeat="n in popularStories">
+						<div class="thumbdiv">
+							<a href="/more?id={% verbatim %}{{ n.id }}{% endverbatim %}">
+								<img src="http://img.contentapi.ws/{% verbatim %}{{ n.thumb_image }}{% endverbatim %}" alt="">
+							
+						</div>
+						<div class="newscontent">
+							<p>{% verbatim %}{{ n.title.substr(0,50) }}{% endverbatim %}... <span class="date">{% verbatim %}{{ n.upload_date }}{% endverbatim %}</span></p>
+							</a>
+						</div>
+					</div><!-- Row end -->	
+						
+					
+		
+		
+					<a href="/more_news?c=Politics&p=1" class="right more">Find More Stories</a>
+					<span class="clear"></span>
+				</div> 
+			</div><!-- Popular Stories module end -->
+        
+        	<div class="center margin20_T"><img src="images/ad-160x600.jpg"></div>
+		</aside><!-- Side Bar end -->
+
+		<span class="clear"></span>
+	</section><!-- Contentarea end -->
+  
+
+
+	<div class="bottom"><div class="ad1"><img src="images/ad1.jpg" alt=""></div></div>
+
+	<footer>
+		<span class="left">Copyright &copy; 2014 Wildridge. All Rights Reserved | 2014 Wildridge. All Rights Reserved | <a href="/tnc">Terms & Conditions</a></span>
+		<span class="right"><a href="#"><img src="images/facebook.png"></a> <a href="#"><img src="images/twitter.png"></a></span>
+		
+		<span class="clear"></span>
+	</footer>
+	<!-- footer end -->
+
+</div>
+<!-- container end -->
+
+</body>
+</html>

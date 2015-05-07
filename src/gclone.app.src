@@ -1,0 +1,19 @@
+{application, gclone,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  goldrush,
+                  lager,
+                  cowboy,
+                  jsx,
+                  ibrowse,
+                  erlydtl
+                 ]},
+  {mod, { gclone_app, []}},
+  {env, []}
+ ]}.
